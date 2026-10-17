@@ -71,3 +71,20 @@ Work Log:
 Stage Summary:
 - All gates green: tsc strict, 27/27 tests, production build (mock excluded), full-flow VLM verification (SD scan realism, camera tree, source guard, lightbox, posture surfaces).
 - Every blocker and major issue from the three POV reviews is fixed; remaining minors are logged in the review trail.
+
+---
+
+## Task ID: 4
+Agent: main agent (Z.ai)
+Task: Milestone 4 — simulated media previews, responsive fixes, final hardening
+
+Work Log:
+- SimulatedArt component: deterministic generated "photo" previews per file id (mulberry32-seeded palette families + horizon-band compositions; video film-strip, audio waveform, document page, archive mock). Wired into the preview pane + lightbox for media categories — every file consistently renders its own artwork (resolves the paying-user POV's #1 friction: "I never saw my photos").
+- Moved the PRNG utility to src/lib/rng.ts (product code no longer imports from the mock tree — the seam discipline audit passes: zero mock imports outside src/mock + the DEV-gated installer).
+- Narrow-layout fixes: container queries moved after the base rules (source-order override — preview pane drops below 1080px container width, tree slims at 760px); verified visually at 1100×760 and restored at 1440×860.
+- Disabled gradient CTAs render flat/desaturated (the save-to-source guard's disabled Save now reads clearly).
+- Code sweep: caption console.info removed; no TODO/FIXME markers; no direct Tauri imports outside the IPC seam; version sync 0.1.0 across package/tauri/Cargo; mock-exclusion audit green.
+
+Stage Summary:
+- All quality gates green: tsc strict, 27/27 tests, production build, mock-exclusion audit, VLM verification across landing/scan(SDR)/results/media-tree/preview-art/lightbox/source-guard/narrow-layout.
+- Four milestones pushed; the UI/UX is complete, premium, and core-drop-in ready.

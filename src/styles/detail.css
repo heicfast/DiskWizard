@@ -102,28 +102,10 @@
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr) var(--preview-w);
   overflow: hidden;
-  container-type: size;
+  container-type: inline-size;
   container-name: detailpanes;
 }
 
-/* Narrow layouts: drop the preview pane first, then slim the tree. */
-@container detailpanes (max-width: 1080px) {
-  .dw-detail__panes {
-    grid-template-columns: 232px minmax(0, 1fr);
-  }
-  .dw-preview {
-    display: none;
-  }
-}
-
-@container detailpanes (max-width: 760px) {
-  .dw-detail__panes {
-    grid-template-columns: 196px minmax(0, 1fr);
-  }
-  .dw-tree__badge {
-    display: none;
-  }
-}
 
 /* ── Tree pane ─────────────────────────────────────────────────────── */
 .dw-tree {
@@ -892,4 +874,25 @@
 .dw-filtermenu__reset {
   color: var(--ink-strong);
   font-weight: 640;
+}
+
+/* Narrow layouts: drop the preview pane first, then slim the tree.
+ * (Placed last: container queries add no specificity — source order
+ * must beat the base .dw-preview rule.) */
+@container detailpanes (max-width: 1080px) {
+  .dw-detail__panes {
+    grid-template-columns: 232px minmax(0, 1fr);
+  }
+  .dw-preview {
+    display: none;
+  }
+}
+
+@container detailpanes (max-width: 760px) {
+  .dw-detail__panes {
+    grid-template-columns: 196px minmax(0, 1fr);
+  }
+  .dw-tree__badge {
+    display: none;
+  }
 }

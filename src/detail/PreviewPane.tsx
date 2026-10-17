@@ -4,6 +4,7 @@ import { formatBytes, formatDate } from "../lib/format";
 import { invoke } from "../lib/ipc";
 import { useEffect, useState } from "react";
 import { useResults } from "../state/results";
+import { SimulatedArt } from "../components/SimulatedArt";
 /**
  * The right preview pane — single-click selection details, double-click
  * live preview with the Recovery Chances gauge and file facts (Status:
@@ -55,7 +56,11 @@ function PreviewBody({ node, loading }: { node: FileNode; loading: boolean }) {
 
         <div className="dw-preview__thumb">
           {info && !loading ? (
-            <PreviewThumb category={node.category} />
+            node.category === "photo" || node.category === "video" || node.category === "audio" ? (
+              <SimulatedArt fileId={node.id} category={node.category} style={{ width: "100%", height: "100%" }} />
+            ) : (
+              <PreviewThumb category={node.category} />
+            )
           ) : (
             <div className="dw-skeleton" style={{ width: "84%", height: "84%" }} />
           )}
@@ -157,7 +162,11 @@ function PreviewButton({ node }: { node: FileNode }) {
         <div className="dw-overlay" style={{ zIndex: 150 }} onClick={() => setOpen(false)}>
           <div className="dw-lightbox" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={`Preview ${node.name}`}>
             <div className="dw-lightbox__stage">
-              <PreviewThumb category={node.category} />
+              {node.category === "photo" || node.category === "video" || node.category === "audio" ? (
+                <SimulatedArt fileId={node.id} category={node.category} style={{ width: "100%", height: "100%" }} />
+              ) : (
+                <PreviewThumb category={node.category} />
+              )}
             </div>
             <div className="dw-lightbox__bar">
               <span className="dw-lightbox__name mono">{node.name}</span>

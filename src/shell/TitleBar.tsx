@@ -35,7 +35,8 @@ export function TitleBar({ onMenu }: { onMenu: () => void }) {
 
   async function caption(verb: "min" | "max" | "close") {
     if (!isTauri()) {
-      console.info("[mock] caption:", verb);
+      // Browser-dev: caption verbs log nowhere — the native window
+      // contract only exists in the Tauri shell.
       return;
     }
     const w = getCurrentWindow();
