@@ -115,6 +115,13 @@ export function DestinationDialog() {
             </div>
           )}
 
+          {selected?.isSource && (
+            <div className="dw-modal__banner dw-modal__banner--warn">
+              <TriangleAlert size={15} />
+              Do not save data to this drive — it is where your data was lost. Saving here can overwrite the files you are recovering.
+            </div>
+          )}
+
           <div className="dw-modal__banner">
             Saving to a different drive than the one you lost data from is strongly recommended.
           </div>
@@ -127,9 +134,9 @@ export function DestinationDialog() {
                 onChange={(e) => setFileRepair(e.target.checked)}
               />
               Enable file repair
-              <span className="dw-destswitch__hint">Repairs corrupted files automatically during recovery</span>
+              <span className="dw-destswitch__hint">Repairs corrupted files automatically · comes with the repair engine</span>
             </label>
-            <Btn variant="ink" disabled={!saveEnabled} onClick={() => void confirm()}>
+            <Btn variant="ink" disabled={!saveEnabled || !!selected?.isSource} onClick={() => void confirm()}>
               Save
             </Btn>
           </div>

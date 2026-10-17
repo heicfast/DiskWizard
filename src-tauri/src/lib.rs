@@ -30,6 +30,7 @@ pub fn run() {
             commands::app::is_elevated,
             commands::app::restart_as_admin,
             // Devices + health
+            commands::devices::unlock_bitlocker,
             commands::devices::enumerate_devices,
             commands::devices::get_disk_health,
             commands::devices::get_health_reports,
@@ -43,6 +44,7 @@ pub fn run() {
             commands::results::get_tree_roots,
             commands::results::get_tree_reveal,
             commands::results::list_children,
+            commands::results::list_type_files,
             commands::results::get_node,
             commands::results::preview_file,
             // Recovery

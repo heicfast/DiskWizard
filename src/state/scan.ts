@@ -62,7 +62,16 @@ export const useScan = create<ScanStore>((set, get) => ({
       showCelebration: false,
       reconNodes: [],
     });
-    await invoke("start_scan", { deviceId: device.id });
+    try {
+      await invoke("start_scan", { deviceId: device.id });
+    } catch (e) {
+      // Roll back the optimistic running state — the scan never started.
+      set({ running: false, paused: false, target: null });
+      void import("./toast").then(({ toast }) =>
+        toast("error", "The scan could not start — the device may have been disconnected."),
+      );
+      throw e;
+    }
   },
 
   async pause() {

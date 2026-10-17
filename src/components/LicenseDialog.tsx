@@ -57,9 +57,9 @@ export function LicenseDialog() {
             {pro ? (
               <div className="dw-license__pro-card">
                 <div className="dw-license__benefits">
-                  <Benefit label={`${state?.tier === "lifetime" ? "Lifetime" : "Yearly"} license — ${state?.name ?? "Pro user"}`} />
+                  <Benefit label={`${state?.tier === "lifetime" ? "Lifetime" : "Yearly"} license`} />
                   <Benefit label={`Active until ${state?.tier === "lifetime" ? "forever" : new Date(state?.expiresAt ?? Date.now()).toLocaleDateString()}`} />
-                  <Benefit label={`Registered to ${state?.email ?? "—"}`} />
+                  <Benefit label={`Registered to ${state?.name ?? "Pro user"}`} />
                 </div>
                 <div className="dw-modal__actions">
                   <Btn
@@ -120,25 +120,35 @@ export function LicenseDialog() {
 
                 <div className="dw-license__benefits">
                   <Benefit label="Unlimited recovery — no 2 GB trial cap" />
-                  <Benefit label="Recover from BitLocker-locked drives" />
+                  <Benefit label="Unlimited BitLocker drive recovery" />
                   <Benefit label="Lost-partition rescue &amp; deep scan" />
                   <Benefit label="Priority technical support" />
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div className="dw-license__buyrow">
+                  <div>
+                    <div className="dw-license__price">
+                      <span className="dw-license__price-now">$69</span>
+                      <span className="dw-license__price-note">one-time · lifetime license</span>
+                    </div>
+                    <div className="dw-hint">30-day money-back guarantee · no subscription</div>
+                  </div>
                   <Btn
-                    variant="outline"
+                    variant="gold"
                     leading={<Sparkles size={14} />}
                     onClick={() => toast("info", "The secure store opens in your browser to complete purchase.")}
                   >
                     Buy a License Now
                   </Btn>
-                  <span className="dw-hint">No reinstallation or rescan required after activation.</span>
+                </div>
+                <div className="dw-hint" style={{ textAlign: "center" }}>
+                  No reinstallation or rescan required after activation.
                 </div>
               </div>
             )}
 
-            <div style={{ marginTop: 16 }}>
+            <div className="dw-license__appearance">
+              <span className="dw-label">Appearance</span>
               <ThemePickerInline />
             </div>
           </motion.div>
@@ -149,10 +159,13 @@ export function LicenseDialog() {
 }
 
 function Benefit({ label }: { label: string }) {
+  // The ampersand entities ship in OUR copy (not server data) — decoded
+  // once, rendered as text nodes (never raw HTML injection).
+  const text = label.replace(/&amp;/g, "&");
   return (
     <span className="dw-license__benefit">
       <Check size={13} strokeWidth={3} />
-      <span dangerouslySetInnerHTML={{ __html: label }} />
+      <span>{text}</span>
     </span>
   );
 }

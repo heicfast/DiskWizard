@@ -17,7 +17,11 @@ export function Sidebar() {
   const license = useLicense((s) => s.state);
   const pro = license?.posture === "pro" || license?.posture === "grace";
 
-  const riskyCount = devices.filter((d) => d.health && d.health !== "good").length;
+  // Only disks the Disk Health surface actually reports (internal,
+  // external, SD) count toward the risk notice.
+  const riskyCount = devices.filter(
+    (d) => d.health && d.health !== "good" && ["internal-partition", "internal-disk", "usb", "sd"].includes(d.kind),
+  ).length;
 
   const groups: Array<{
     label: string;

@@ -11,15 +11,12 @@ import { IconBtn } from "../components/buttons";
 export function Toolbar() {
   const search = useResults((s) => s.search);
   const setSearch = useResults((s) => s.setSearch);
-  const treeSelection = useResults((s) => s.treeSelection);
-  const roots = useResults((s) => s.roots);
+  const folderName = useResults((s) => s.list.folderName);
   const progress = useScan((s) => s.progress);
   const goHome = useHomeNav();
 
   const target = useScan((s) => s.target);
-  const crumb = treeSelection
-    ? nodeName(treeSelection, roots)
-    : (target?.name ?? "Scanning...");
+  const crumb = folderName ?? target?.name ?? "Scanning...";
 
   return (
     <div className="dw-toolbar">
@@ -63,6 +60,8 @@ export function Toolbar() {
 
 function phaseLabel(p: string): string {
   switch (p) {
+    case "sdr":
+      return "SD RESCUE";
     case "quick":
       return "QUICK SCAN";
     case "quick-complete":
@@ -76,11 +75,6 @@ function phaseLabel(p: string): string {
     default:
       return "SCAN";
   }
-}
-
-function nodeName(id: string, roots: { id: string; name: string }[]): string {
-  if (roots.some((r) => r.id === id)) return roots.find((r) => r.id === id)!.name;
-  return "folder";
 }
 
 function useHomeNav(): () => void {

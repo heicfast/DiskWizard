@@ -27,6 +27,31 @@ import { TourDriver } from "./shell/TourDriver";
  * lifecycle, event-bus wiring, overlays (license, theme, hamburger),
  * the toast bus, and the DEV tour driver.
  */
+/** Persistent posture banner: grace (offline, N days left) and
+ * degraded (reconnect to validate) — never shown for pro/unlicensed. */
+function PostureBanner() {
+  const state = useLicense((s) => s.state);
+  if (!state) return null;
+  if (state.posture === "grace") {
+    const days = state.expiresAt ? Math.max(0, Math.ceil((state.expiresAt - Date.now()) / 86400_000)) : 0;
+    return (
+      <div className="dw-posture dw-posture--grace">
+        <TriangleAlert size={14} />
+        Offline — {days} day{days === 1 ? "" : "s"} left to validate your license. Features stay fully unlocked.
+      </div>
+    );
+  }
+  if (state.posture === "degraded") {
+    return (
+      <div className="dw-posture dw-posture--degraded">
+        <TriangleAlert size={14} />
+        Your license needs to reconnect to validate. Recovery is paused until the connection returns.
+      </div>
+    );
+  }
+  return null;
+}
+
 export function App() {
   const page = useView((s) => s.page);
   const menuOpen = useView((s) => s.menuOpen);
@@ -86,6 +111,9 @@ export function App() {
             {page === "file-repair" && <FileRepairView key="repair" />}
           </main>
         </div>
+
+        {/* Posture banners (grace / degraded — the licensing contract). */}
+        <PostureBanner />
 
         {/* Overlays */}
         <HamburgerMenu />

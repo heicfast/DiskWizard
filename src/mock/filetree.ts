@@ -181,6 +181,8 @@ function file(
   status: FileStatus = "existing",
   sizeHint?: number,
 ): FileNode {
+  // The display path always ends with this node's own name (name/path
+  // coherence contract — the preview pane shows both).
   const base =
     sizeHint ??
     (category === "video"
@@ -215,7 +217,8 @@ function file(
 
 function seedFilesFor(parent: FileNode, count: number, pool: readonly string[], category: FileCategory, status: FileStatus = "existing"): void {
   for (let i = 0; i < count; i++) {
-    file(parent.id, pick(rng, pool), `${parent.path}\\${pick(rng, pool)}`, category, status);
+    const name = pick(rng, pool);
+    file(parent.id, name, `${parent.path}\\${name}`, category, status);
   }
 }
 
@@ -333,8 +336,9 @@ export const RECON_FILES: FileNode[] = [];
   for (let i = 0; i < 96; i++) {
     const [pool, cat] = reconPool[i % reconPool.length];
     const parent = parents[i % parents.length];
+    const name = pick(rng, pool);
     RECON_FILES.push(
-      file(parent.id, pick(rng, pool), `${parent.path}\\${pick(rng, pool)}`, cat, "reconstructed"),
+      file(parent.id, name, `${parent.path}\\${name}`, cat, "reconstructed"),
     );
   }
 }
@@ -353,6 +357,20 @@ export function allNodes(): FileNode[] {
 
 export function nodeById(id: string): FileNode | undefined {
   return nodes.get(id);
+}
+
+export function mediaChildrenOf(parentId: string | null): FileNode[] {
+  // The full node map backs both corpora (ids are unique across them);
+  // folder ids from the media tree resolve their seeded files here.
+  const out: FileNode[] = [];
+  for (const n of nodes.values()) {
+    if (n.parentId === parentId) out.push(n);
+  }
+  out.sort((a, b) => {
+    if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1;
+    return a.name.localeCompare(b.name, undefined, { numeric: true });
+  });
+  return out;
 }
 
 export function childrenOf(parentId: string | null): FileNode[] {
@@ -410,6 +428,63 @@ export function typeBranches(): TypeBranch[] {
 export const QUICK_PHASE_FILES = allNodes().filter(
   (n) => !n.isFolder && n.status !== "reconstructed",
 );
+
+/* ═══ Media-device corpus ═══════════════════════════════════════════
+ * SD / USB scans surface a camera-shaped tree (DCIM / PRIVATE / video
+ * folders) instead of the Windows corpus — the per-device realism
+ * contract.
+ */
+const MEDIA_ROOT = folder(null, "Card Storage", "\\", 9_412, "deleted", "folder");
+const dcim = folder(MEDIA_ROOT.id, "DCIM", "\\DCIM", 6_881, "deleted", "photo");
+const canon100 = folder(dcim.id, "100CANON", "\\DCIM\\100CANON", 3_204, "deleted", "photo");
+seedFilesFor(canon100, 34, ["IMG_4401.cr2", "IMG_4402.cr2", "IMG_0021.heic", "IMG_20260814_184522.jpg", "beach_sunset.png"], "photo", "deleted");
+const sony100 = folder(dcim.id, "100MSDCF", "\\DCIM\\100MSDCF", 1_988, "deleted", "photo");
+seedFilesFor(sony100, 22, ["DSC_0812.NEF", "DSC_0813.NEF", "P1080471.psd", "family_photo_2019.jpg"], "photo", "deleted");
+const privateAvchd = folder(dcim.id, "PRIVATE", "\\DCIM\\PRIVATE", 1_689, "deleted", "video");
+seedFilesFor(privateAvchd, 10, ["00001.MTS", "00002.MTS", "VID_20260704_211903.mp4"], "video", "deleted");
+const videoDir = folder(MEDIA_ROOT.id, "VIDEO", "\\VIDEO", 1_402, "deleted", "video");
+seedFilesFor(videoDir, 12, ["VID_20260704_211903.mp4", "birthday_2026.mov", "GoPro_GX010042.MP4", "drone_flight_04.mp4"], "video", "deleted");
+const misc = folder(MEDIA_ROOT.id, "MISC", "\\MISC", 1_129, "deleted", "other");
+seedFilesFor(misc, 8, ["gopro_readme.txt", "GPS_log.gpx", "thumbcache.db"], "other", "deleted");
+
+const MEDIA_LOST = folder(null, "File Path Lost", "Lost\\", 1_204, "deleted", "folder");
+const mediaLostPhotos = folder(MEDIA_LOST.id, "Recovered JPEG", "Lost\\Recovered JPEG", 1_091, "deleted", "photo");
+seedFilesFor(mediaLostPhotos, 26, ["IMG_0031.heic", "IMG_0032.heic", "party_photos_004.jpg", "wedding_photo_112.jpg", "cat_video_thumbnail.jpg"], "photo", "deleted");
+const mediaLostRaw = folder(MEDIA_LOST.id, "RAW Fragments", "Lost\\RAW Fragments", 113, "deleted", "photo");
+seedFilesFor(mediaLostRaw, 8, ["_MG_9142.CR2", "P1020488.RW2", "A0001.ARW"], "photo", "deleted");
+
+const MEDIA_RECON = folder(null, "Reconstructed", "Reconstructed\\", 0, "reconstructed", "folder");
+
+export const MEDIA_ROOTS: FileNode[] = [MEDIA_ROOT, MEDIA_LOST, MEDIA_RECON];
+export const MEDIA_ROOT_IDS = [MEDIA_ROOT.id, MEDIA_LOST.id, MEDIA_RECON.id];
+
+export const MEDIA_RECON_FILES: FileNode[] = [];
+{
+  const mediaPool: Array<[readonly string[], FileCategory]> = [
+    [PHOTO_NAMES, "photo"],
+    [VIDEO_NAMES, "video"],
+  ];
+  for (let i = 0; i < 48; i++) {
+    const [pool, cat] = mediaPool[i % mediaPool.length];
+    const name = pick(rng, pool);
+    MEDIA_RECON_FILES.push(
+      file(MEDIA_RECON.id, name, `Reconstructed\\${name}`, cat, "reconstructed"),
+    );
+  }
+}
+
+/** Per-device scan profile — the realism ladder. */
+export const DEVICE_PROFILES: Record<string, { files: number; bytes: number; media: boolean; sectors: number }> = {
+  "disk0-part-c": { files: 1_139_261, bytes: 147.04 * 1024 ** 3, media: false, sectors: 314_135_598 },
+  "disk0-part-d": { files: 486_221, bytes: 61.2 * 1024 ** 3, media: false, sectors: 314_135_598 },
+  disk1: { files: 1_412_884, bytes: 210.4 * 1024 ** 3, media: false, sectors: 3_907_029_184 },
+  "usb-sandisk": { files: 96_412, bytes: 22.8 * 1024 ** 3, media: true, sectors: 233_385_984 },
+  "sd-kingston": { files: 9_412, bytes: 22.3 * 1024 ** 3, media: true, sectors: 116_282_368 },
+  "wd-bitlocker": { files: 210_411, bytes: 88.2 * 1024 ** 3, media: false, sectors: 7_814_875_136 },
+  "lost-part-0": { files: 41_209, bytes: 47.8 * 1024 ** 3, media: false, sectors: 264_111_552 },
+  "recycle-bin": { files: 3_882, bytes: 0.42 * 1024 ** 3, media: false, sectors: 314_135_598 },
+  desktop: { files: 388, bytes: 0.11 * 1024 ** 3, media: false, sectors: 314_135_598 },
+};
 
 /** Final aggregate stats for the completion modal (ground-truth values). */
 export const FINAL_STATS = {

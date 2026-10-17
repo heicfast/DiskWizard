@@ -12,6 +12,15 @@ pub async fn enumerate_devices() -> Result<Value, String> {
     Ok(json!([]))
 }
 
+/// BitLocker unlock (password or 48-digit recovery key) — SIMULATED
+/// body until the core's FVE chain lands (pipe + XTS-AES stream).
+#[tauri::command]
+pub async fn unlock_bitlocker(device_id: String, mode: String, secret: String) -> Result<Value, String> {
+    let _ = (device_id, mode, secret);
+    // SIMULATED — core TODO: DRWService FVE pipe + BitLockerLib unlock.
+    Ok(json!({ "unlocked": true }))
+}
+
 /// SMART report for one disk.
 #[tauri::command]
 pub async fn get_disk_health(disk_id: String) -> Result<Value, String> {

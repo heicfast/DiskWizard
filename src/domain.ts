@@ -88,6 +88,7 @@ export interface DiskHealthReport {
 
 export type ScanPhase =
   | "idle"
+  | "sdr"
   | "quick"
   | "quick-complete"
   | "advanced"

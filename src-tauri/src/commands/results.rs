@@ -20,6 +20,14 @@ pub async fn list_children(parent_id: Option<String>) -> Result<Value, String> {
     Ok(json!([]))
 }
 
+/// Type-mode category listing (the classify tree's sample files).
+#[tauri::command]
+pub async fn list_type_files(category: String) -> Result<Value, String> {
+    let _ = category;
+    // SIMULATED — core TODO: the classify model's per-category nodes.
+    Ok(json!([]))
+}
+
 #[tauri::command]
 pub async fn get_node(node_id: String) -> Result<Value, String> {
     Err(format!("NODE_NOT_FOUND. {node_id}"))

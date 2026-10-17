@@ -39,10 +39,9 @@ export function ScanHud() {
     const useSelected = ids.length > 0;
     // Empty ids = "Recover All" — the core treats it as the full scan
     // result set (virtual aggregate recovery).
-    (window as unknown as { __dwRecoverIds?: string[] }).__dwRecoverIds = useSelected ? ids : [];
     const count = useSelected ? ids.length : recoverableCount;
     const bytes = useSelected ? selectedBytes : recoverableBytes;
-    void openDialog(count, bytes);
+    void openDialog(useSelected ? ids : [], count, bytes);
   }
 
   return (
@@ -68,6 +67,8 @@ export function ScanHud() {
               "Scan stopped — results kept"
             ) : paused ? (
               "Scan Paused"
+            ) : phase === "sdr" ? (
+              "SD Card Rescue — restoring access to the card..."
             ) : (
               <>
                 {phase === "advanced" ? "Advanced Scanning" : phase === "organizing" ? "Organizing found files" : "Quick Scanning"}

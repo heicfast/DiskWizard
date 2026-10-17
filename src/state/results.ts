@@ -23,6 +23,8 @@ export interface ResultFilters {
 
 export interface ListState {
   folderId: string | null;
+  /** The folder's display name (the breadcrumb source). */
+  folderName: string | null;
   nodes: FileNode[];
   loading: boolean;
 }
@@ -75,12 +77,23 @@ const DEFAULT_FILTERS: ResultFilters = {
   deletedOnly: false,
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  photo: "Graphics",
+  video: "Videos",
+  audio: "Audio",
+  document: "Documents",
+  archive: "Archives",
+  email: "Emails",
+  bookmark: "Bookmarks",
+  other: "Others",
+};
+
 export const useResults = create<ResultsStore>((set, get) => ({
   roots: [],
   treeMode: "path",
   expanded: new Set<string>(),
   treeSelection: null,
-  list: { folderId: null, nodes: [], loading: false },
+  list: { folderId: null, folderName: null, nodes: [], loading: false },
   selection: new Set<string>(),
   filters: DEFAULT_FILTERS,
   search: "",
@@ -119,9 +132,18 @@ export const useResults = create<ResultsStore>((set, get) => ({
   },
 
   async openFolder(id) {
-    set({ list: { folderId: id, nodes: [], loading: true } });
-    const nodes = await invoke<FileNode[]>("list_children", { parentId: id });
-    set({ list: { folderId: id, nodes, loading: false } });
+    const name = id?.startsWith("type:")
+      ? TYPE_LABELS[id.slice(5)] ?? id
+      : (get().list.nodes.find((n) => n.id === id)?.name ?? id);
+    set({ list: { folderId: id, folderName: name, nodes: [], loading: true } });
+    // Type-mode branches ("type:<category>") list the category sample.
+    const nodes = id?.startsWith("type:")
+      ? await invoke<FileNode[]>("list_type_files", { category: id.slice(5) })
+      : await invoke<FileNode[]>("list_children", { parentId: id });
+    // Sequence guard: a slow response for folder A must not land after
+    // the user navigated to folder B (last-clicked wins).
+    if (get().list.folderId !== id) return;
+    set({ list: { folderId: id, folderName: name, nodes, loading: false } });
   },
 
   toggleFile(id) {
@@ -188,8 +210,15 @@ export const useResults = create<ResultsStore>((set, get) => ({
   openPreview(node) {
     set({ preview: { node, loading: true } });
     void invoke<import("../domain").FilePreview>("preview_file", { fileId: node.id })
-      .then((p) => set({ preview: { node: { ...node, grade: p.previewable ? node.grade : "unknown" }, loading: false } }))
-      .catch(() => set({ preview: { node, loading: false } }));
+      .then((p) => {
+        // Sequence guard: only apply if this node is still the preview.
+        if (get().preview.node?.id !== node.id) return;
+        set({ preview: { node: { ...node, grade: p.previewable ? node.grade : "unknown" }, loading: false } });
+      })
+      .catch(() => {
+        if (get().preview.node?.id !== node.id) return;
+        set({ preview: { node, loading: false } });
+      });
   },
 
   clearPreview() {

@@ -51,3 +51,23 @@ Work Log:
 Stage Summary:
 - All quality gates green: tsc strict ✓, 27/27 tests ✓, production build ✓ (mock excluded), VLM flow verification ✓ (landing 9.5/10, scan, results, preview, celebration, destination, license gate, activation, themes incl. logo system, disk health, splash, BitLocker unlock→scan).
 - CI-ready: the tour harness and workflows mirror the DiskGenie release architecture.
+
+---
+
+## Task ID: 3
+Agent: main agent (Z.ai)
+Task: Milestone 3 — multi-POV review fixes (PM + senior dev + paying user), realism + trust hardening
+
+Work Log:
+- Multi-POV review round via three parallel agents: product manager (funnel/coverage), senior developer (architecture/correctness audit), real paying user (interactive walkthrough with screenshots).
+- BLOCKER fixes: registered unlock_bitlocker in the Rust generate_handler (parity audit); removed the mock import from HomeView — the session banner now loads through list_scan_sessions on the IPC seam (zero mock data in product code).
+- Correctness hardening: sequence guards on openFolder/openPreview (last-clicked wins); scan start rollback + toast on failure; recovery cancel now invokes cancel_recovery and drops finished events for cancelled jobs; recover_files failure path surfaces errors and preserves the pending intent across the license gate; activation success resumes the pending recovery.
+- Trust fixes: the completion summary carries the REAL destination (no more hardcoded D:\Recovered Files); save-to-source guard (isSource derivation + warning banner + Save disabled on the scanned drive); preview lightbox wired to the Preview button (ESC + focus trap); LicenseDialog trust pack ($69 one-time price, 30-day money-back guarantee, working Buy row, honest BitLocker benefit copy, plain-text benefits, Appearance-labeled theme section); "Enable file repair" labeled as coming with the repair engine.
+- Realism: per-device scan profiles (SD card scans show 9,412 files / 22.3 GB with a camera corpus — DCIM/100CANON/100MSDCF/VIDEO/MISC tree — instead of the Windows dump; USB media profile; C: keeps the 1.1M ground truth); name/path coherence fix in the generator; accurate trial-gate copy (distinguishes "selection larger than allowance" from "allowance exhausted"); risky-disk sidebar count only counts reportable disks.
+- Systemic a11y: ModalShell now implements the full dialog contract (ESC-to-close, role=dialog, aria-modal, focus trap, focus restoration) behind every overlay.
+- Posture banners: grace ("offline — N days left") and degraded (reconnect) surfaces per the licensing contract.
+- Visual polish: disabled gradient CTAs render flat/desaturated (readable disabled state).
+
+Stage Summary:
+- All gates green: tsc strict, 27/27 tests, production build (mock excluded), full-flow VLM verification (SD scan realism, camera tree, source guard, lightbox, posture surfaces).
+- Every blocker and major issue from the three POV reviews is fixed; remaining minors are logged in the review trail.

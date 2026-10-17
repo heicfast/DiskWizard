@@ -4,7 +4,6 @@ import { formatBytes, formatDate } from "../lib/format";
 import { invoke } from "../lib/ipc";
 import { useEffect, useState } from "react";
 import { useResults } from "../state/results";
-
 /**
  * The right preview pane — single-click selection details, double-click
  * live preview with the Recovery Chances gauge and file facts (Status:
@@ -74,15 +73,7 @@ function PreviewBody({ node, loading }: { node: FileNode; loading: boolean }) {
 
         <div className="dw-preview__name">{node.name}</div>
 
-        <button
-          className="dw-btn dw-btn--ink dw-preview__previewbtn"
-          onClick={() => {
-            /* The standalone Preview dialog ships with the viewer subsystem. */
-          }}
-        >
-          <Eye size={14} />
-          Preview
-        </button>
+        <PreviewButton node={node} />
 
         <div className="dw-preview__meta">
           <MetaRow label="Size" value={formatBytes(node.sizeBytes, 2)} />
@@ -140,4 +131,46 @@ function PreviewThumb({ category }: { category: string }) {
     default:
       return <FileText />;
   }
+}
+
+/** The standalone preview lightbox — expands the thumbnail with the
+ * recovery-chances verdict (the viewer subsystem's UI contract). */
+function PreviewButton({ node }: { node: FileNode }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <>
+      <button className="dw-btn dw-btn--ink dw-preview__previewbtn" onClick={() => setOpen(true)}>
+        <Eye size={14} />
+        Preview
+      </button>
+      {open && (
+        <div className="dw-overlay" style={{ zIndex: 150 }} onClick={() => setOpen(false)}>
+          <div className="dw-lightbox" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={`Preview ${node.name}`}>
+            <div className="dw-lightbox__stage">
+              <PreviewThumb category={node.category} />
+            </div>
+            <div className="dw-lightbox__bar">
+              <span className="dw-lightbox__name mono">{node.name}</span>
+              <span className={`dw-chip ${gradeClass(node.grade)}`} style={{ marginLeft: "auto" }}>
+                Recovery Chances: {node.grade === "high" ? "High" : node.grade === "medium" ? "Medium" : node.grade === "low" ? "Low" : "Unknown"}
+              </span>
+              <button className="dw-btn dw-btn--compact" onClick={() => setOpen(false)} aria-label="Close preview">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

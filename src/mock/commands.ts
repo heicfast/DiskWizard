@@ -25,12 +25,14 @@ import type {
 import { emitMockEvent, setMockBackend } from "../lib/ipc";
 import { DEVICES, QUICK_LOCATIONS, LAST_SESSION, healthFor } from "./inventory";
 import {
-  FINAL_STATS,
+  DEVICE_PROFILES,
+  MEDIA_RECON_FILES,
+  MEDIA_ROOTS,
   QUICK_PHASE_FILES,
   RECON_FILES,
   ROOTS,
-  ROOT_IDS,
   childrenOf,
+  mediaChildrenOf,
   nodeById,
   SEARCH_PATHS,
 } from "./filetree";
@@ -80,6 +82,8 @@ const TRIAL_QUOTA = 2 * GB;
 interface ScanRun {
   scanId: string;
   device: DeviceInfo;
+  /** Per-device realism profile (targets, corpus style, sector count). */
+  profile: { files: number; bytes: number; media: boolean; sectors: number };
   phase: ScanProgress["phase"];
   startedAt: number;
   elapsedBefore: number;
@@ -96,12 +100,10 @@ interface ScanRun {
 let scanRun: ScanRun | null = null;
 let scanTick = 0;
 
-const SECTORS_TOTAL = 314_135_598; // 149.45 GB / 512 B — ground truth
-const QUICK_FILES_TARGET = 1_139_261;
-const QUICK_BYTES_TARGET = 147.04 * GB;
+const DEFAULT_SECTORS = 314_135_598;
 
 /** Compressed-but-realistic phase durations (dev simulation). */
-const PHASE_MS = { quick: 9_000, advanced: 15_000, organizing: 2_400 };
+const PHASE_MS = { sdr: 3_200, quick: 9_000, advanced: 15_000, organizing: 2_400 };
 
 function scanEvent(): void {
   if (!scanRun) return;
@@ -116,35 +118,50 @@ function scanEvent(): void {
     filesFound: run.filesFound,
     bytesFound: run.bytesFound,
     sector: run.sector,
-    sectorsTotal: SECTORS_TOTAL,
-    remainingSec: run.phase === "advanced" ? 463 + Math.round((1 - run.percent / 100) * 60) : remainingSec,
+    sectorsTotal: run.profile.sectors,
+    remainingSec:
+      run.phase === "advanced"
+        ? Math.max(6, Math.round((run.profile.sectors / DEFAULT_SECTORS) * (463 + (1 - run.percent / 100) * 60)))
+        : remainingSec,
     elapsedMs,
     searching:
-      run.phase === "quick" || run.phase === "advanced"
-        ? SEARCH_PATHS[scanTick % SEARCH_PATHS.length]
-        : "Organizing found files...",
+      run.phase === "sdr"
+        ? "SD Card Rescue: restoring access to the card..."
+        : run.phase === "quick" || run.phase === "advanced"
+          ? SEARCH_PATHS[scanTick % SEARCH_PATHS.length]
+          : "Organizing found files...",
     quickFiles: run.phase === "quick" || run.phase === "quick-complete" ? run.filesFound : undefined,
   };
   emitMockEvent("scan-progress", progress);
 }
 
 function advanceScan(): void {
-  if (!scanRun || scanRun.paused) return;
+  if (!scanRun || run_phase_paused(scanRun)) return;
   const run = scanRun;
   scanTick++;
   const dt = 500;
+  // Per-device realism targets (the scan profile).
+  const FILES_TARGET = run.profile.files;
+  const BYTES_TARGET = run.profile.bytes;
 
-  if (run.phase === "quick") {
+  if (run.phase === "sdr") {
+    // SD Card Rescue: attempt to restore access to the card first.
+    run.percent = Math.min(100, run.percent + (100 * dt) / PHASE_MS.sdr);
+    if (run.percent >= 100) {
+      run.phase = "quick";
+      run.percent = 0;
+    }
+  } else if (run.phase === "quick") {
     run.percent = Math.min(100, run.percent + (100 * dt) / PHASE_MS.quick);
     // MFT walk: front-loaded discovery curve.
     const t = run.percent / 100;
-    run.filesFound = Math.floor(QUICK_FILES_TARGET * (1 - Math.pow(1 - t, 2.2)));
-    run.bytesFound = QUICK_BYTES_TARGET * (1 - Math.pow(1 - t, 2.0));
+    run.filesFound = Math.floor(FILES_TARGET * (1 - Math.pow(1 - t, 2.2)));
+    run.bytesFound = BYTES_TARGET * (1 - Math.pow(1 - t, 2.0));
     if (run.percent >= 100) {
       run.phase = "quick-complete";
       emitMockEvent("scan-quick-complete", {
-        files: QUICK_FILES_TARGET,
-        bytes: QUICK_BYTES_TARGET,
+        files: FILES_TARGET,
+        bytes: BYTES_TARGET,
       });
       // Auto-continue into the advanced (deep) pass after a beat.
       window.setTimeout(() => {
@@ -158,18 +175,19 @@ function advanceScan(): void {
     }
   } else if (run.phase === "advanced") {
     run.percent = Math.min(100, run.percent + (100 * dt) / PHASE_MS.advanced);
-    run.sector = Math.floor((run.percent / 100) * SECTORS_TOTAL);
-    // Carved adds: File Path Lost settled at 4.4K during quick; the
-    // Reconstructed branch grows through the deep pass.
+    run.sector = Math.floor((run.percent / 100) * run.profile.sectors);
+    // Carved adds: the Reconstructed branch grows through the deep pass.
     const t = run.percent / 100;
-    run.filesFound = QUICK_FILES_TARGET + Math.floor(3_120 * t);
-    run.bytesFound = QUICK_BYTES_TARGET + 1.1 * GB * t;
-    const reconTarget = Math.floor(RECON_FILES.length * Math.pow(t, 1.6));
+    const carved = Math.max(48, Math.floor(FILES_TARGET * 0.004));
+    run.filesFound = FILES_TARGET + Math.floor(carved * t);
+    run.bytesFound = BYTES_TARGET + (BYTES_TARGET * 0.008) * t;
+    const reconPool = run.profile.media ? MEDIA_RECON_FILES : RECON_FILES;
+    const reconTarget = Math.floor(reconPool.length * Math.pow(t, 1.6));
     if (reconTarget > run.revealedRecon) {
       emitMockEvent("scan-recon-batch", {
         from: run.revealedRecon,
         to: reconTarget,
-        nodes: RECON_FILES.slice(run.revealedRecon, reconTarget).map(publicNode),
+        nodes: reconPool.slice(run.revealedRecon, reconTarget).map(publicNode),
       });
       run.revealedRecon = reconTarget;
     }
@@ -181,12 +199,25 @@ function advanceScan(): void {
     run.percent = Math.min(100, run.percent + (100 * dt) / PHASE_MS.organizing);
     if (run.percent >= 100) {
       run.phase = "complete";
-      run.filesFound = FINAL_STATS.filesFound;
-      run.bytesFound = FINAL_STATS.bytesFound;
-      emitMockEvent("scan-complete", { ...FINAL_STATS, scanId: run.scanId });
+      run.filesFound = FILES_TARGET + Math.max(48, Math.floor(FILES_TARGET * 0.004));
+      run.bytesFound = BYTES_TARGET * 1.008;
+      emitMockEvent("scan-complete", {
+        filesFound: run.filesFound,
+        filesScanned: run.filesFound,
+        bytesFound: run.bytesFound,
+        usedTimeMs: run.elapsedBefore,
+        organized: run.filesFound,
+        scanId: run.scanId,
+      });
+      // The engine halts at completion — no further progress events.
+      stopScanTimer();
     }
   }
   scanEvent();
+}
+
+function run_phase_paused(run: ScanRun): boolean {
+  return run.paused;
 }
 
 function startScanTimer(): void {
@@ -328,10 +359,13 @@ const COMMANDS: Record<string, (args?: Record<string, unknown>) => Promise<unkno
     const device = [...DEVICES, ...QUICK_LOCATIONS].find((d) => d.id === deviceId);
     if (!device) throw new Error(`SCAN_TARGET_NOT_FOUND. ${String(deviceId)}`);
     if (scanRun) stopScanTimer();
+    const profile =
+      DEVICE_PROFILES[device.id] ?? { files: 41_209, bytes: 12 * 1024 ** 3, media: false, sectors: 314_135_598 };
     scanRun = {
       scanId: `scan-${Date.now().toString(36)}`,
       device,
-      phase: "quick",
+      profile,
+      phase: device.kind === "sd" && device.fileSystem === "RAW" ? "sdr" : "quick",
       startedAt: Date.now(),
       elapsedBefore: 0,
       percent: 0,
@@ -381,7 +415,7 @@ const COMMANDS: Record<string, (args?: Record<string, unknown>) => Promise<unkno
           filesFound: scanRun.filesFound,
           bytesFound: scanRun.bytesFound,
           sector: scanRun.sector,
-          sectorsTotal: SECTORS_TOTAL,
+          sectorsTotal: scanRun.profile.sectors,
           remainingSec: 60,
           elapsedMs: scanRun.elapsedBefore + (scanRun.paused ? 0 : Date.now() - scanRun.startedAt),
           searching: "Stopped",
@@ -389,14 +423,32 @@ const COMMANDS: Record<string, (args?: Record<string, unknown>) => Promise<unkno
       : null,
 
   /* Results */
-  get_tree_roots: async () => ROOTS.map(publicNode),
+  get_tree_roots: async () => {
+    const media = scanRun?.profile.media ?? false;
+    return (media ? MEDIA_ROOTS : ROOTS).map(publicNode);
+  },
   get_tree_reveal: async () => {
     // Nodes revealed so far (browse-while-scanning contract).
+    const media = scanRun?.profile.media ?? false;
     const visible = QUICK_PHASE_FILES.filter((n) => n.status !== "reconstructed");
-    const reconVisible = scanRun ? RECON_FILES.slice(0, scanRun.revealedRecon) : [];
-    return { roots: ROOT_IDS, nodes: [...visible, ...conconVisibleSafe(reconVisible)].map(publicNode) };
+    const reconPool = media ? MEDIA_RECON_FILES : RECON_FILES;
+    const reconVisible = scanRun ? reconPool.slice(0, scanRun.revealedRecon) : [];
+    const rootIds = media
+      ? MEDIA_ROOTS.map((r) => r.id)
+      : ROOTS.map((r) => r.id);
+    return { roots: rootIds, nodes: [...visible, ...reconVisible].map(publicNode) };
   },
-  list_children: async (args) => childrenOf((args?.parentId as string | null) ?? null).map(publicNode),
+  list_children: async (args) => {
+    const parentId = (args?.parentId as string | null) ?? null;
+    const media = scanRun?.profile.media ?? false;
+    return (media ? mediaChildrenOf(parentId) : childrenOf(parentId)).map(publicNode);
+  },
+  list_type_files: async (args) => {
+    const cat = String(args?.category ?? "");
+    const { typeBranches } = await import("./filetree");
+    const branch = typeBranches().find((b) => b.category === cat);
+    return branch ? branch.sample.map(publicNode) : [];
+  },
   get_node: async (args) => {
     const n = nodeById(String(args?.nodeId ?? ""));
     if (!n) throw new Error(`NODE_NOT_FOUND. ${String(args?.nodeId ?? "")}`);
@@ -437,15 +489,21 @@ const COMMANDS: Record<string, (args?: Record<string, unknown>) => Promise<unkno
     const all = ids.length === 0;
     const files = all ? [] : ids.map((id) => nodeById(id)).filter((n): n is FileNode => !!n && !n.isFolder);
     if (!all && files.length === 0) throw new Error("NOTHING_TO_RECOVER. Select files to recover first.");
-    // The virtual aggregate: "Recover All" = every file the scan found.
-    const virtualCount = FINAL_STATS.filesFound;
-    const virtualBytes = FINAL_STATS.bytesFound;
+    // The virtual aggregate: "Recover All" = every file the scan found
+    // (scaled by the active scan's device profile).
+    const virtualCount = scanRun?.filesFound ?? 41_209;
+    const virtualBytes = scanRun?.bytesFound ?? 12 * GB;
     const totalBytes = all ? virtualBytes : files.reduce((s, f) => s + f.sizeBytes, 0);
 
     // License ladder: the 2 GB trial quota, then the hard gate.
     if (license.posture === "unlicensed" && license.trialRecoveredBytes + totalBytes > TRIAL_QUOTA) {
+      const recovered = (license.trialRecoveredBytes / GB).toFixed(2);
+      const detail =
+        license.trialRecoveredBytes > 0
+          ? `trial recovery limit reached — ${recovered} GB of the 2 GB allowance recovered`
+          : `this selection is ${formatSize(totalBytes)} — larger than the 2 GB free trial allowance`;
       throw new Error(
-        `ACTIVATION_REQUIRED. Free trial recovery limit (2 GB) reached — ${(license.trialRecoveredBytes / GB).toFixed(2)} GB recovered. Activate DiskWizard Pro for unlimited recovery.`,
+        `ACTIVATION_REQUIRED. Free trial: ${detail}. Activate DiskWizard Pro for unlimited recovery, or recover a smaller selection first.`,
       );
     }
     if (license.posture === "degraded") {
@@ -542,8 +600,9 @@ const COMMANDS: Record<string, (args?: Record<string, unknown>) => Promise<unkno
   },
 };
 
-function conconVisibleSafe(nodes: FileNode[]): FileNode[] {
-  return nodes.filter(Boolean);
+function formatSize(bytes: number): string {
+  if (bytes >= GB) return `${(bytes / GB).toFixed(2)} GB`;
+  return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
 }
 
 function wait(ms: number): Promise<void> {

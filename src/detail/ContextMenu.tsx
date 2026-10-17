@@ -46,10 +46,9 @@ export function ContextMenu() {
             <CtxItem icon={<Undo2 size={14} />} label="Recover" onClick={() => {
               const ids = [...useResults.getState().selection];
               if (ids.length === 0 && node && !node.isFolder) ids.push(node.id);
-              (window as unknown as { __dwRecoverIds?: string[] }).__dwRecoverIds = ids;
               const bytes = useResults.getState().selectedBytes();
               close();
-              void useRecovery.getState().openDialog(ids.length, bytes);
+              void useRecovery.getState().openDialog(ids, ids.length, bytes);
             }} />
             <CtxItem icon={<Eye size={14} />} label="Preview" onClick={() => {
               if (node) useResults.getState().openPreview(node);

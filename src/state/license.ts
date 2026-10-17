@@ -53,6 +53,9 @@ export const useLicense = create<LicenseStore>((set, get) => ({
     try {
       const state = await invoke<LicenseState>("activate_license", { key: normalizeKey(key) });
       set({ state, busy: false, dialogOpen: false });
+      // Resume a recovery that was gated at the moment of value.
+      const { resumePendingRecovery } = await import("./recovery");
+      resumePendingRecovery();
       return { ok: true };
     } catch (e) {
       const msg = String(e);

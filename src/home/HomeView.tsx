@@ -15,12 +15,11 @@ import {
   Wrench,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SdCardGlyph } from "../components/Icon";
 import type { DeviceInfo } from "../domain";
 import { Btn } from "../components/buttons";
 import { formatBytes } from "../lib/format";
-import { LAST_SESSION } from "../mock/inventory";
 import { useDevices } from "../state/devices";
 import { useScan } from "../state/scan";
 import { useView } from "../state/view";
@@ -126,6 +125,9 @@ function LandingGrid() {
             <HelpCircle size={14} />
             Unable to find your hard drive? <a onClick={() => toast("info", "Refresh drives, reconnect the device, or check Disk Health for SMART warnings.")}>Refresh drives</a>
           </div>
+          <div className="dw-home__fs-support">
+            Restores data from all file systems — NTFS, NTFS5, FAT12/16/32, exFAT, ReFS, ext2/3/4, HFS+
+          </div>
         </div>
       </div>
 
@@ -178,9 +180,79 @@ export function StepStrip({ step }: { step: 1 | 2 | 3 }) {
 
 /* ── Session resume banner ─────────────────────────────────────────────── */
 
+interface SessionInfo {
+  id: string;
+  volume: string;
+  scannedAt: string;
+  filesFound: number;
+  sizeBytes: number;
+  durationMs: number;
+}
+
+function formatDuration(ms: number): string {
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${m}m ${s}s`;
+}
+
 function SessionBanner() {
   const go = useView((s) => s.go);
   const setStep = useView((s) => s.setStep);
+  const [session, setSession] = useState<SessionInfo | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void import("../lib/ipc").then(async ({ invoke }) => {
+      try {
+        const sessions = await invoke<SessionInfo[]>("list_scan_sessions");
+        if (alive) setSession(sessions[0] ?? null);
+      } catch {
+        /* session listing unavailable in this context */
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (!session) return null;
+
+  /** Resume the .rsf session: import → completed scan state → results. */
+  async function onLoadSession(): Promise<void> {
+    const s = session;
+    if (!s) return;
+    const { invoke } = await import("../lib/ipc");
+    const { useScan } = await import("../state/scan");
+    const { useResults } = await import("../state/results");
+    await invoke("import_scan_session", { sessionId: s.id });
+    // Hydrate the completed scan state from the session record.
+    useScan.setState({
+      running: false,
+      paused: false,
+      progress: {
+        phase: "complete",
+        percent: 100,
+        filesFound: s.filesFound,
+        bytesFound: s.sizeBytes,
+        sector: 0,
+        sectorsTotal: 0,
+        remainingSec: 0,
+        elapsedMs: s.durationMs,
+        searching: "Session restored",
+      },
+      stats: {
+        filesFound: s.filesFound,
+        bytesFound: s.sizeBytes,
+        usedTimeMs: s.durationMs,
+      },
+      showCelebration: false,
+    });
+    toast("success", `Scan session loaded — ${s.filesFound.toLocaleString()} files found.`);
+    setStep(3);
+    go("detail");
+    await useResults.getState().loadRoots();
+  }
+
   return (
     <div className="dw-session">
       <span className="dw-session__icon">
@@ -189,18 +261,15 @@ function SessionBanner() {
       <div>
         <div className="dw-session__label">Continue last scanning</div>
         <div className="dw-session__meta">
-          Windows (C:) · Scan time 14m 42s · Scan files 481,204 · Scan disk Samsung SSD 970 EVO
+          {session.volume} · Scan time {formatDuration(session.durationMs)} · Scan files{" "}
+          {session.filesFound.toLocaleString()} · Scanned {session.scannedAt}
         </div>
       </div>
       <Btn
         className="dw-session__load"
         compact
         variant="outline"
-        onClick={() => {
-          toast("success", `Scan session loaded — ${LAST_SESSION.filesFound.toLocaleString()} files found.`);
-          setStep(3);
-          go("detail");
-        }}
+        onClick={() => void onLoadSession()}
       >
         Load
       </Btn>

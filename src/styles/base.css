@@ -162,8 +162,19 @@ code,
 }
 
 .dw-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: default;
+}
+
+/* Gradient CTAs read as clearly disabled (flat + desaturated). */
+.dw-btn--ink:disabled,
+.dw-btn--gold:disabled,
+.dw-btn--danger-ink:disabled {
+  background: var(--track);
+  box-shadow: none;
+  color: var(--text-tertiary);
+  opacity: 1;
+  filter: none;
 }
 
 .dw-btn--compact {

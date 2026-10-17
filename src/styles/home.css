@@ -437,6 +437,13 @@
   font-weight: 580;
 }
 
+.dw-home__fs-support {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  padding-top: 2px;
+}
+
 /* ── Bottom CTA bar (Scan) ─────────────────────────────────────────── */
 .dw-home__cta {
   position: absolute;
