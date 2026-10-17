@@ -39,7 +39,7 @@
   /* ── Text (rosewood ladder) ───────────────────────────────────────── */
   --text: #3b2428;
   --text-secondary: #8a6568;
-  --text-tertiary: #a38083;
+  --text-tertiary: #997679;
   --on-pastel: #0f172a;
   --on-pastel-secondary: #334155;
 
@@ -69,6 +69,7 @@
   --success: #30b373;
   --success-soft: rgba(48, 179, 115, 0.12);
   --warn: #f5a623;
+  --warn-strong: #b97314;
   --warn-soft: rgba(245, 166, 35, 0.14);
   --danger: #e74f4f;
   --danger-soft: rgba(231, 79, 79, 0.1);
@@ -303,7 +304,7 @@
   --overlay: rgba(90, 40, 35, 0.16);
   --text: #3b2428;
   --text-secondary: #8a6568;
-  --text-tertiary: #a38083;
+  --text-tertiary: #997679;
   --on-control: #8a6568;
   --control-border: #e0c6c0;
   --control-hover: #f5e8e5;

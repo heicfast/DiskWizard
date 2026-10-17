@@ -1,0 +1,38 @@
+[package]
+name = "diskwizard"
+version = "0.1.0"
+description = "DiskWizard — bring your files back. Premium data recovery with a Rust core."
+authors = ["DiskWizard"]
+license = "Proprietary"
+repository = "https://github.com/heicfast/DiskWizard"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "diskwizard_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+parking_lot = "0.12"
+
+# ── Feature flags ─────────────────────────────────────────────────────────
+# CI license simulation for the screenshot harness — NEVER enabled in
+# NSIS/MSIX release builds (the command body compiles to a hard refusal
+# without the feature).
+[features]
+ci-license-sim = []
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = 3
+panic = "abort"
+strip = true

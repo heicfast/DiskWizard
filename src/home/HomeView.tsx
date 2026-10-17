@@ -25,6 +25,7 @@ import { useDevices } from "../state/devices";
 import { useScan } from "../state/scan";
 import { useView } from "../state/view";
 import { toast } from "../state/toast";
+import { BitlockerDialog } from "./BitlockerDialog";
 
 /**
  * The landing page — Step 1: "Select a Location to Start".
@@ -50,6 +51,7 @@ function LandingGrid() {
   const go = useView((s) => s.go);
 
   const [busyRefresh, setBusyRefresh] = useState(false);
+  const [bitlockerDevice, setBitlockerDevice] = useState<DeviceInfo | null>(null);
 
   const groups = useMemo(() => {
     const g: Record<string, DeviceInfo[]> = {
@@ -78,7 +80,8 @@ function LandingGrid() {
   async function onScan() {
     if (!selected) return;
     if (selected.locked) {
-      toast("warn", "This drive is BitLocker protected. Enter your recovery key to unlock it first.");
+      // BitLocker entry: password / recovery key → unlock → scan.
+      setBitlockerDevice(selected);
       return;
     }
     await startScan(selected);
@@ -128,18 +131,24 @@ function LandingGrid() {
 
       <div className="dw-home__cta">
         <span className="dw-home__cta-hint">
-          {selected ? `Ready to scan ${selected.name}` : "Select a location to enable scanning"}
+          {selected
+            ? selected.locked
+              ? `${selected.name} is BitLocker protected — unlock to recover`
+              : `Ready to scan ${selected.name}`
+            : "Select a location to enable scanning"}
         </span>
         <Btn
           variant="ink"
           className="dw-home__scan"
           disabled={!selected || scanning}
           onClick={() => void onScan()}
-          leading={<RotateCcw size={16} />}
+          leading={selected?.locked ? <Lock size={16} /> : <RotateCcw size={16} />}
         >
-          Search for Lost Data
+          {selected?.locked ? "Unlock and Recover" : "Search for Lost Data"}
         </Btn>
       </div>
+
+      <BitlockerDialog device={bitlockerDevice} onClose={() => setBitlockerDevice(null)} />
     </div>
   );
 }
@@ -278,7 +287,7 @@ export function DeviceTile({
     <motion.button
       layout
       type="button"
-      className={`dw-tile${selected ? " is-selected" : ""}`}
+      className={`dw-tile${selected ? " is-selected" : ""}${device.kind === "internal-disk" || device.kind === "bitlocker-locked" ? " dw-tile--wide" : ""}`}
       onClick={onSelect}
       whileTap={{ scale: 0.99 }}
       aria-pressed={selected}

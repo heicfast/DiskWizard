@@ -1,0 +1,47 @@
+name: MSIX Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Build the release exe (NO ci-license-sim — production refusal contract)
+        working-directory: src-tauri
+        run: npx tauri build --no-bundle
+
+      - name: Stage the MSIX layout
+        shell: pwsh
+        run: node scripts/msix-stage.mjs
+
+      - name: MakeAppx pack
+        shell: pwsh
+        run: |
+          $env:PATH = "C:\Program Files (x86)\Windows Kits\10\App Certification Kit;$env:PATH"
+          MakeAppx.exe pack /d msix-layout /p DiskWizard.msix /nv
+
+      - name: Hash
+        shell: bash
+        run: sha256sum DiskWizard.msix > SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diskwizard-msix
+          path: |
+            DiskWizard.msix
+            SHA256SUMS.txt

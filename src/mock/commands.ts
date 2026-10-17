@@ -292,6 +292,22 @@ const COMMANDS: Record<string, (args?: Record<string, unknown>) => Promise<unkno
     return true;
   },
 
+  /* BitLocker */
+  unlock_bitlocker: async (args) => {
+    await wait(600);
+    const deviceId = String(args?.deviceId ?? "");
+    const mode = String(args?.mode ?? "password");
+    const secret = String(args?.secret ?? "");
+    const dev = DEVICES.find((d) => d.id === deviceId);
+    if (!dev || !dev.locked) throw new Error("BITLOCKER_VOLUME_NOT_LOCKED. This volume is not locked.");
+    const ok =
+      mode === "password"
+        ? secret.length >= 4
+        : secret.replace(/\D/g, "").length === 48;
+    if (!ok) throw new Error("BITLOCKER_UNLOCK_FAILED. Check your password or recovery key.");
+    return { unlocked: true, deviceId: dev.id };
+  },
+
   /* Devices */
   enumerate_devices: async (): Promise<DeviceInfo[]> => {
     await wait(900); // splash "Reading the disk information" beat

@@ -5,7 +5,7 @@
  */
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "ink" | "outline" | "ghost" | "danger-ink";
+type Variant = "ink" | "outline" | "ghost" | "danger-ink" | "gold";
 
 export interface BtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -23,7 +23,7 @@ export function Btn({
   children,
   ...rest
 }: BtnProps) {
-  const v = variant === "ink" ? " dw-btn--ink" : variant === "danger-ink" ? " dw-btn--danger-ink" : variant === "ghost" ? " dw-btn--ghost" : "";
+  const v = variant === "ink" ? " dw-btn--ink" : variant === "danger-ink" ? " dw-btn--danger-ink" : variant === "gold" ? " dw-btn--gold" : variant === "ghost" ? " dw-btn--ghost" : "";
   return (
     <button
       type="button"

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck (strict)
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Frontend production build
+        run: npm run build
+
+      - name: Mock exclusion audit (release bundle ships no mock)
+        shell: bash
+        run: |
+          if grep -q "src/mock" dist/assets/*.js 2>/dev/null; then
+            echo "::error::mock core leaked into the production bundle"
+            exit 1
+          fi
+          echo "mock core correctly absent from the release bundle"
+
+      - name: Version sync
+        run: node scripts/check-version-sync.mjs
+
+  rust:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Rust format + clippy + check (shell)
+        working-directory: src-tauri
+        run: |
+          cargo fmt --check
+          cargo clippy -- -D warnings
+          cargo check
+
+      - name: Rust tests
+        working-directory: src-tauri
+        run: cargo test

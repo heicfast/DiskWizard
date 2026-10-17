@@ -187,6 +187,19 @@ code,
   box-shadow: var(--ink-glow-strong);
 }
 
+.dw-btn--gold {
+  background: linear-gradient(180deg, #ffd27a 0%, #ffbe43 55%, #f0a023 100%);
+  border: none;
+  color: #4a2f07;
+  font-weight: 640;
+  box-shadow: 0 2px 8px rgba(255, 190, 67, 0.35), 0 1px 2px rgba(240, 160, 35, 0.25);
+}
+
+.dw-btn--gold:hover:not(:disabled) {
+  filter: saturate(1.08) brightness(1.02);
+  color: #3d2605;
+}
+
 .dw-btn--danger-ink {
   background: linear-gradient(180deg, #ff7a6e 0%, #e74f4f 55%, #d63a3a 100%);
   border: none;
@@ -257,7 +270,7 @@ code,
 
 .dw-chip--caution {
   background: var(--health-caution-soft);
-  color: var(--warn);
+  color: var(--warn-strong);
 }
 
 .dw-chip--bad {

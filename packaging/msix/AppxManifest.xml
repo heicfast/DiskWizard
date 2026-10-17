@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
+  <Identity Name="__IDENTITY_NAME__"
+            Publisher="__PUBLISHER__"
+            Version="__VERSION__"
+            ProcessorArchitecture="x64"/>
+  <Properties>
+    <DisplayName>DiskWizard</DisplayName>
+    <PublisherDisplayName>DiskWizard</PublisherDisplayName>
+    <Logo>Assets\Square44x44Logo.png</Logo>
+    <Description>Bring your files back — premium data recovery with disk health monitoring.</Description>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0"/>
+  </Dependencies>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+    <rescap:Capability Name="allowElevation"/>
+    <Capability Name="internetClient"/>
+  </Capabilities>
+  <Applications>
+    <Application Id="DiskWizard" Executable="diskwizard.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        BackgroundColor="#1552D5"
+        DisplayName="DiskWizard"
+        Description="Bring your files back — premium data recovery with disk health monitoring."
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"/>
+      <Extensions>
+        <uap:Extension Category="windows.fullTrustProcess"/>
+      </Extensions>
+    </Application>
+  </Applications>
+</Package>

@@ -59,7 +59,7 @@ export function TitleBar({ onMenu }: { onMenu: () => void }) {
       <div className="dw-titlebar__actions">
         {!pro && (
           <Btn
-            variant="ink"
+            variant="gold"
             compact
             className="dw-titlebar__buy"
             leading={<ShoppingCart size={14} />}

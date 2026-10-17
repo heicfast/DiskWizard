@@ -30,3 +30,24 @@ Stage Summary:
 - Complete premium UI/UX with fully simulated core, verified working end-to-end via agent-browser + VLM.
 - Vite production build passes; TypeScript strict passes; mock tree-shaken from release bundle.
 - Repo: https://github.com/heicfast/DiskWizard
+
+---
+
+## Task ID: 2
+Agent: main agent (Z.ai)
+Task: Milestone 2 — Tauri scaffold, CI workflows, docs, tests, BitLocker flow, designer polish
+
+Work Log:
+- Added the complete Tauri 2 scaffold: tauri.conf.json (frameless, maximized default, pre-painted blossom background, NSIS perMachine), Cargo.toml (ci-license-sim feature, release hardening: LTO/codegen-units=1/strip), capabilities, brand-kit icons, and the full command surface in Rust (app/devices/scan/results/recovery/license modules with SIMULATED bodies matching the mock wire shapes).
+- Elevation contract: requireAdministrator app manifest (UAC at launch) via tauri-build WindowsAttributes + MSIX allowElevation capability.
+- GitHub workflows: ci.yml (typecheck/tests/build + mock-exclusion audit + rust gates), ui-screenshots.yml (title-synced tour capture), msix-build.yml (release exe → staged layout → MakeAppx).
+- CI scripts: check-version-sync.mjs (3-file sync), tour-capture.mjs (playwright tour harness with tNN marker polling), msix-stage.mjs (logo fan-out + manifest substitution), with_dev.sh.
+- packaging/msix/AppxManifest.xml (runFullTrust + allowElevation + internetClient).
+- docs/LICENSING-ARCHITECTURE.md (DiskGenie-parity posture machine, DW- key format, L0-L10 roadmap) + AGENTS.md (agent working agreements + quality gates).
+- Tests (27): theme registry invariants + index.html/tokens.css sync contract, licenseKey formatting/completeness/alphabet, format helpers, mock determinism (tree roots, parent links, device corpus, SMART states, rng).
+- BitLocker unlock flow (core first-priority feature): Password/Recovery-Key tabs, 48-digit counter, unlock spinner ("Decrypting the volume stream"), unlock→scan hand-off; unlock_bitlocker mock command; CTA switches to "Unlock and Recover" for locked tiles.
+- Senior-designer polish round: gold Buy Now variant (conversion CTA distinct from ink), whole-disk tiles span full width (fixes staggered grid), contrast fixes (tile specs/model → text-secondary, tertiary deepened to #997679, caution chips → warn-strong), tsconfig excludes tests (vitest owns them).
+
+Stage Summary:
+- All quality gates green: tsc strict ✓, 27/27 tests ✓, production build ✓ (mock excluded), VLM flow verification ✓ (landing 9.5/10, scan, results, preview, celebration, destination, license gate, activation, themes incl. logo system, disk health, splash, BitLocker unlock→scan).
+- CI-ready: the tour harness and workflows mirror the DiskGenie release architecture.

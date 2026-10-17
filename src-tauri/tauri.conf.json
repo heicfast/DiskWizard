@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DiskWizard",
+  "version": "0.1.0",
+  "identifier": "app.diskwizard",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1430",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "DiskWizard",
+        "label": "main",
+        "width": 1440,
+        "height": 860,
+        "minWidth": 1100,
+        "minHeight": 680,
+        "maximized": true,
+        "decorations": false,
+        "shadow": true,
+        "transparent": false,
+        "visible": false,
+        "backgroundColor": "#FBF1EE",
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "additionalBrowserArgs": "--enable-features=OverlayScrollbar,FluentOverlayScrollbar"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data:; media-src 'self' asset: http://asset.localhost; frame-src 'self' asset: http://asset.localhost; connect-src ipc: http://ipc.localhost",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/256x256.png",
+      "icons/icon.ico"
+    ],
+    "copyright": "© 2026 DiskWizard",
+    "category": "Utility",
+    "shortDescription": "Bring your files back.",
+    "longDescription": "DiskWizard recovers deleted files from Recycle Bin, HDD, SSD, USB and SD cards, repairs corrupted files, and monitors disk health.",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      },
+      "nsis": {
+        "installMode": "perMachine",
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/bitmap-header.bmp",
+        "sidebarImage": "icons/bitmap-sidebar.bmp"
+      }
+    }
+  }
+}
