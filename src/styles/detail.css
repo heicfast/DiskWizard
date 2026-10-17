@@ -1,0 +1,895 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * DiskWizard detail — the scan + results page (Steps 2–3).
+ * Toolbar / tree / list / preview / searching strip / bottom HUD.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.dw-detail {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Toolbar ───────────────────────────────────────────────────────── */
+.dw-toolbar {
+  flex: none;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--background);
+}
+
+.dw-toolbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dw-toolbar__crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 10px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--chip);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 340px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dw-toolbar__crumb svg {
+  color: var(--text-tertiary);
+  flex: none;
+}
+
+.dw-toolbar__spacer {
+  flex: 1;
+}
+
+.dw-toolbar__search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 240px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--control-border);
+  background: var(--card);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    width var(--dur-base) var(--ease-out);
+}
+
+.dw-toolbar__search:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--ink-soft);
+  width: 300px;
+}
+
+.dw-toolbar__search svg {
+  color: var(--text-tertiary);
+  flex: none;
+}
+
+.dw-toolbar__search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+}
+
+.dw-toolbar__search input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ── Main 3-pane split ─────────────────────────────────────────────── */
+.dw-detail__panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr) var(--preview-w);
+  overflow: hidden;
+  container-type: size;
+  container-name: detailpanes;
+}
+
+/* Narrow layouts: drop the preview pane first, then slim the tree. */
+@container detailpanes (max-width: 1080px) {
+  .dw-detail__panes {
+    grid-template-columns: 232px minmax(0, 1fr);
+  }
+  .dw-preview {
+    display: none;
+  }
+}
+
+@container detailpanes (max-width: 760px) {
+  .dw-detail__panes {
+    grid-template-columns: 196px minmax(0, 1fr);
+  }
+  .dw-tree__badge {
+    display: none;
+  }
+}
+
+/* ── Tree pane ─────────────────────────────────────────────────────── */
+.dw-tree {
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.dw-tree__tabs {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 8px 10px 4px;
+}
+
+.dw-tree__tab {
+  flex: 1;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+  font-weight: 620;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.dw-tree__tab:hover {
+  background: var(--control-hover);
+  color: var(--text-secondary);
+}
+
+.dw-tree__tab.is-active {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-1);
+}
+
+.dw-tree__scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 6px 16px;
+  min-height: 0;
+}
+
+.dw-tree__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.dw-tree__row:hover {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
+.dw-tree__row.is-selected {
+  background: var(--ink-soft);
+  color: var(--ink);
+  font-weight: 620;
+}
+
+.dw-tree__caret {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.dw-tree__caret.is-open {
+  transform: rotate(90deg);
+}
+
+.dw-tree__caret.is-leaf {
+  visibility: hidden;
+}
+
+.dw-tree__icon {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-tertiary);
+}
+
+.dw-tree__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-tree__badge {
+  flex: none;
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  background: var(--chip);
+  border-radius: var(--radius-xs);
+}
+
+.dw-tree__special {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--warn);
+}
+
+/* ── List pane ─────────────────────────────────────────────────────── */
+.dw-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dw-list__header {
+  flex: none;
+  display: grid;
+  grid-template-columns: 34px minmax(140px, 1.5fr) 84px 100px 118px 92px;
+  align-items: center;
+  height: 36px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--panel);
+  font-size: 11.5px;
+  font-weight: 640;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.dw-list__col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: var(--radius-xs);
+}
+
+.dw-list__col:hover {
+  color: var(--text-secondary);
+}
+
+.dw-list__col.is-sorted {
+  color: var(--ink);
+}
+
+.dw-list__scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+.dw-row {
+  display: grid;
+  grid-template-columns: 34px minmax(140px, 1.5fr) 84px 100px 118px 92px;
+  align-items: center;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: default;
+  border-bottom: 1px solid color-mix(in srgb, var(--divider) 55%, transparent);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.dw-row:hover {
+  background: var(--control-hover);
+}
+
+.dw-row.is-selected-row {
+  background: var(--ink-soft);
+}
+
+.dw-row__name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.dw-row__name svg {
+  flex: none;
+  color: var(--text-tertiary);
+}
+
+.dw-row__name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dw-row__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dw-row__check input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.dw-row__num {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+}
+
+.dw-row__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+}
+
+.dw-row__type-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.dw-row__grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 19px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 640;
+}
+
+.dw-row__grade--high {
+  background: var(--health-good-soft);
+  color: var(--health-good);
+}
+
+.dw-row__grade--medium {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.dw-row__grade--low {
+  background: var(--used-soft);
+  color: var(--used);
+}
+
+.dw-row__grade--unknown {
+  background: var(--chip);
+  color: var(--text-tertiary);
+}
+
+.dw-row__status {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.dw-row__status--deleted {
+  color: var(--warn);
+}
+
+.dw-row__status--reconstructed {
+  color: var(--ink);
+}
+
+.dw-list__empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 13.5px;
+}
+
+/* ── Preview pane ──────────────────────────────────────────────────── */
+.dw-preview {
+  border-left: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.dw-preview__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+.dw-preview__title {
+  font-size: 12px;
+  font-weight: 660;
+  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dw-preview__thumb {
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  overflow: hidden;
+  position: relative;
+}
+
+.dw-preview__thumb svg {
+  width: 44px;
+  height: 44px;
+  opacity: 0.55;
+}
+
+.dw-preview__name {
+  font-size: 14px;
+  font-weight: 640;
+  word-break: break-all;
+}
+
+.dw-preview__previewbtn {
+  height: 32px;
+}
+
+.dw-preview__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.dw-preview__meta-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.dw-preview__meta-row:last-child {
+  border-bottom: none;
+}
+
+.dw-preview__meta-label {
+  color: var(--text-tertiary);
+  font-weight: 560;
+}
+
+.dw-preview__meta-value {
+  color: var(--text);
+  word-break: break-all;
+  font-variant-numeric: tabular-nums;
+}
+
+.dw-preview__chances {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 1px solid var(--divider);
+}
+
+.dw-preview__chances-label {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 580;
+}
+
+.dw-preview__chances-pill {
+  margin-left: auto;
+}
+
+/* ── Gauge (circular progress, the scan HUD) ───────────────────────── */
+.dw-gauge {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: none;
+}
+
+.dw-gauge svg {
+  transform: rotate(-90deg);
+}
+
+.dw-gauge__track {
+  fill: none;
+  stroke: var(--track);
+  stroke-width: 4.5;
+}
+
+.dw-gauge__fill {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--dur-base) var(--ease-out);
+}
+
+.dw-gauge--paused .dw-gauge__fill {
+  stroke: var(--warn);
+}
+
+.dw-gauge__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.dw-gauge__label small {
+  font-size: 7px;
+  font-weight: 640;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+  letter-spacing: 0.05em;
+}
+
+/* ── Searching strip ───────────────────────────────────────────────── */
+.dw-searching {
+  flex: none;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  background: var(--ink-soft);
+  color: var(--ink-strong);
+  font-size: 12.5px;
+  font-weight: 580;
+  overflow: hidden;
+}
+
+.dw-searching__label {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 660;
+}
+
+.dw-searching__path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink-strong) 78%, var(--text));
+  direction: rtl;
+  text-align: left;
+}
+
+.dw-searching--paused {
+  background: var(--used-soft);
+  color: var(--used);
+}
+
+.dw-searching--complete {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.dw-searching__scananim {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, currentColor 32%, transparent);
+  border-top-color: currentColor;
+  animation: dw-spin 0.85s linear infinite;
+}
+
+/* ── Bottom HUD bar ────────────────────────────────────────────────── */
+.dw-bottombar {
+  flex: none;
+  height: var(--bottom-bar-h);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px 0 18px;
+  border-top: 1px solid var(--divider);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.dw-bottombar__gauge {
+  flex: none;
+}
+
+.dw-bottombar__status {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dw-bottombar__line1 {
+  font-size: 14px;
+  font-weight: 660;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-bottombar__line1.is-complete {
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dw-bottombar__line2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dw-bottombar__line2 .dw-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dw-bottombar__line2 button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: var(--ink-strong);
+  font-size: 11.5px;
+  font-weight: 640;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.dw-bottombar__line2 button:hover {
+  background: var(--ink-soft);
+}
+
+.dw-bottombar__line2 button.is-paused {
+  color: var(--warn);
+}
+
+.dw-bottombar__line2 button.is-paused:hover {
+  background: var(--warn-soft);
+}
+
+.dw-bottombar__spacer {
+  flex: 1;
+}
+
+.dw-bottombar__count {
+  flex: none;
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dw-bottombar__recover {
+  flex: none;
+  min-width: 176px;
+  height: 42px;
+  font-size: 14.5px;
+}
+
+/* ── Quick-complete banner ─────────────────────────────────────────── */
+.dw-quickdone {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  max-width: 640px;
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dw-quickdone__icon {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--success-soft);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dw-quickdone__title {
+  font-size: 14px;
+  font-weight: 680;
+}
+
+.dw-quickdone__body {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ── Filter bar ────────────────────────────────────────────────────── */
+.dw-filterbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--background);
+}
+
+.dw-filterbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--control-border);
+  background: var(--card);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 580;
+  position: relative;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.dw-filterbtn:hover {
+  border-color: color-mix(in srgb, var(--ink) 36%, var(--control-border));
+  color: var(--text);
+}
+
+.dw-filterbtn.has-value {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--ink-soft);
+}
+
+.dw-filterbtn__caret {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.dw-filterbtn__caret.is-open {
+  transform: rotate(180deg);
+}
+
+.dw-filterbar__spacer {
+  flex: 1;
+}
+
+.dw-filterbar__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 580;
+  white-space: nowrap;
+}
+
+.dw-filtermenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 216px;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+}
+
+.dw-filtermenu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 540;
+  text-align: left;
+}
+
+.dw-filtermenu__item:hover {
+  background: var(--control-hover);
+}
+
+.dw-filtermenu__item.is-on {
+  color: var(--ink);
+  font-weight: 620;
+  background: var(--ink-soft);
+}
+
+.dw-filtermenu__sep {
+  height: 1px;
+  background: var(--divider);
+  margin: 5px 8px;
+}
+
+.dw-filtermenu__reset {
+  color: var(--ink-strong);
+  font-weight: 640;
+}

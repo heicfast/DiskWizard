@@ -1,0 +1,326 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * DiskWizard base — reset, typography, scrollbars, focus.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  user-select: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Text selection — only in editable/preview contexts. */
+input,
+textarea,
+[data-selectable="true"] {
+  user-select: text;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* ── Scrollbars (slim, overlay-style) ──────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-tertiary) 36%, transparent);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-secondary) 55%, transparent);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+
+/* ── Focus ring (WCAG floor) ───────────────────────────────────────── */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: var(--focus-w) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-xs);
+}
+
+/* ── Brand mark (theme-reactive circle) ────────────────────────────── */
+.dw-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ink-grad);
+  overflow: hidden;
+  flex: none;
+  position: relative;
+}
+
+.dw-brand-mark img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────── */
+.dw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--control-border);
+  background: var(--card);
+  color: var(--on-control);
+  font-weight: 560;
+  font-size: 13.5px;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+  white-space: nowrap;
+}
+
+.dw-btn:hover:not(:disabled) {
+  background: var(--control-hover);
+  border-color: color-mix(in srgb, var(--ink) 32%, var(--control-border));
+  color: var(--text);
+}
+
+.dw-btn:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+}
+
+.dw-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.dw-btn--compact {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  border-radius: var(--radius-sm);
+}
+
+.dw-btn--ink {
+  background: var(--ink-grad);
+  border: none;
+  color: var(--on-ink);
+  font-weight: 620;
+  box-shadow: var(--ink-glow);
+}
+
+.dw-btn--ink:hover:not(:disabled) {
+  filter: saturate(1.06) brightness(1.03);
+  color: var(--on-ink);
+  box-shadow: var(--ink-glow-strong);
+}
+
+.dw-btn--danger-ink {
+  background: linear-gradient(180deg, #ff7a6e 0%, #e74f4f 55%, #d63a3a 100%);
+  border: none;
+  color: #fff;
+  font-weight: 620;
+}
+
+.dw-btn--ghost {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.dw-btn--ghost:hover:not(:disabled) {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
+.dw-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.dw-iconbtn:hover:not(:disabled) {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
+.dw-iconbtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.dw-iconbtn.is-active {
+  background: var(--ink-soft);
+  color: var(--ink);
+}
+
+/* ── Chips / pills ─────────────────────────────────────────────────── */
+.dw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 560;
+  white-space: nowrap;
+}
+
+.dw-chip--good {
+  background: var(--health-good-soft);
+  color: var(--health-good);
+}
+
+.dw-chip--caution {
+  background: var(--health-caution-soft);
+  color: var(--warn);
+}
+
+.dw-chip--bad {
+  background: var(--health-bad-soft);
+  color: var(--health-bad);
+}
+
+.dw-chip--ink {
+  background: var(--ink-soft);
+  color: var(--ink);
+}
+
+/* ── Common text helpers ───────────────────────────────────────────── */
+.dw-label {
+  font-size: 11px;
+  font-weight: 640;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.dw-sub {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.dw-hint {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+/* ── Skeleton shimmer ──────────────────────────────────────────────── */
+.dw-skeleton {
+  background: var(--skeleton);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.dw-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, var(--shimmer) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: dw-shimmer 1.4s infinite;
+}
+
+@keyframes dw-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dw-skeleton::after {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,638 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * DiskWizard overlays — modals, destination dialog, context menu,
+ * license dialog, theme picker, hamburger menu.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.dw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ── Modal card ────────────────────────────────────────────────────── */
+.dw-modal {
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  padding: 26px 28px 22px;
+  max-height: 86vh;
+  overflow-y: auto;
+}
+
+.dw-modal__title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.dw-modal__title--center {
+  text-align: center;
+}
+
+.dw-modal__body {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 6px 0 10px;
+}
+
+.dw-modal__body--center {
+  text-align: center;
+}
+
+.dw-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.dw-modal__actions--center {
+  justify-content: center;
+}
+
+.dw-modal__cta {
+  min-width: 168px;
+  height: 40px;
+  font-size: 14px;
+}
+
+.dw-modal__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.dw-modal__stats--grid4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.dw-modal__stat {
+  background: var(--panel);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dw-modal__stat-value {
+  font-size: 16.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-modal__stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 580;
+}
+
+.dw-modal__banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  background: var(--ink-soft);
+  color: var(--ink-strong);
+  font-size: 12.5px;
+  font-weight: 580;
+  line-height: 1.4;
+}
+
+.dw-modal__banner--warn {
+  background: var(--used-soft);
+  color: var(--used);
+}
+
+.dw-modal__banner--success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.dw-modal .dw-destlist + .dw-modal__banner,
+.dw-modal .dw-destlist ~ .dw-destfoot {
+  margin-top: 12px;
+}
+
+.dw-modal + .dw-modal__banner {
+  margin-top: 10px;
+}
+
+.dw-modal__footnote {
+  margin-top: 12px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  line-height: 1.45;
+}
+
+.dw-modal__footnote--center {
+  text-align: center;
+}
+
+/* ── Celebration hero ──────────────────────────────────────────────── */
+.dw-modal--celebrate {
+  text-align: center;
+}
+
+.dw-modal__hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 84px;
+  margin-bottom: 4px;
+}
+
+.dw-modal__hero-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--success-soft);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--success) 8%, transparent);
+}
+
+.dw-modal__confetti {
+  position: absolute;
+  right: calc(50% - 74px);
+  top: 2px;
+  color: var(--ink);
+  transform: rotate(14deg);
+}
+
+/* ── Destination dialog ────────────────────────────────────────────── */
+.dw-desttabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--chip);
+  margin: 8px 0 12px;
+}
+
+.dw-desttab {
+  height: 30px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+  font-weight: 620;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.dw-desttab:hover {
+  color: var(--text-secondary);
+}
+
+.dw-desttab.is-active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
+}
+
+.dw-destlist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.dw-destrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  background: var(--panel);
+  text-align: left;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.dw-destrow:hover {
+  border-color: var(--border);
+}
+
+.dw-destrow.is-selected {
+  border-color: var(--ink);
+  background: var(--card);
+}
+
+.dw-destrow__radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--control-border);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.dw-destrow__radio.is-on {
+  border-color: var(--ink);
+}
+
+.dw-destrow__radio.is-on::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-grad);
+}
+
+.dw-destrow__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex: none;
+}
+
+.dw-destrow__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dw-destrow__name {
+  font-size: 13.5px;
+  font-weight: 640;
+  display: block;
+}
+
+.dw-destrow__stats {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+  display: block;
+}
+
+.dw-destrow__warn {
+  color: var(--warn);
+  flex: none;
+}
+
+.dw-destcloud {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+}
+
+.dw-destcloud__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--ink-soft);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.dw-destfoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--divider);
+}
+
+.dw-destswitch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 620;
+  color: var(--ink-strong);
+  cursor: pointer;
+}
+
+.dw-destswitch input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.dw-destswitch__hint {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+/* ── Recovery progress ─────────────────────────────────────────────── */
+.dw-recoverbar {
+  height: 8px;
+  border-radius: 6px;
+  background: var(--track);
+  overflow: hidden;
+  margin: 14px 0 8px;
+}
+
+.dw-recoverbar__fill {
+  height: 100%;
+  border-radius: 6px;
+  background: var(--ink-grad);
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+.dw-recoverbar__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dw-recoverbar__pct {
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.dw-recoverbar__file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ── Context menu ──────────────────────────────────────────────────── */
+.dw-ctxmenu {
+  min-width: 218px;
+  padding: 5px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+}
+
+.dw-ctxmenu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 540;
+  text-align: left;
+  width: 100%;
+}
+
+.dw-ctxmenu__item:hover {
+  background: var(--ink-soft);
+  color: var(--ink-strong);
+}
+
+.dw-ctxmenu__icon {
+  display: inline-flex;
+  color: var(--text-tertiary);
+}
+
+.dw-ctxmenu__item:hover .dw-ctxmenu__icon {
+  color: var(--ink);
+}
+
+.dw-ctxmenu__sep {
+  height: 1px;
+  background: var(--divider);
+  margin: 4px 8px;
+}
+
+/* ── License dialog ────────────────────────────────────────────────── */
+.dw-license {
+  width: 100%;
+}
+
+.dw-license__entry {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dw-license__keyrow {
+  display: flex;
+  gap: 8px;
+}
+
+.dw-license__key {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--control-border);
+  background: var(--card);
+  padding: 0 14px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.dw-license__key:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--ink-soft);
+  outline: none;
+}
+
+.dw-license__key::placeholder {
+  color: var(--text-tertiary);
+  font-family: var(--font-ui);
+  letter-spacing: 0;
+}
+
+.dw-license__paste {
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+.dw-license__pro-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dw-license__pro-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dw-license__benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--panel);
+}
+
+.dw-license__benefit {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.dw-license__benefit svg {
+  color: var(--free);
+  flex: none;
+}
+
+/* ── Theme picker ──────────────────────────────────────────────────── */
+.dw-themepicker {
+  position: absolute;
+  top: calc(var(--title-bar-h) + 6px);
+  right: 12px;
+  z-index: 140;
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.dw-themeswatch {
+  width: 132px;
+  padding: 0 0 8px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--control-border);
+  background: var(--card);
+  overflow: hidden;
+  text-align: left;
+  transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.dw-themeswatch:hover {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.dw-themeswatch.is-active {
+  border-color: var(--ink);
+  box-shadow: var(--ink-glow);
+}
+
+.dw-themeswatch__canvas {
+  height: 56px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dw-themeswatch__chip {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 640;
+  color: var(--text);
+  background: var(--chip);
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+}
+
+.dw-themeswatch__label {
+  display: block;
+  padding: 7px 10px 0;
+  font-size: 11.5px;
+  font-weight: 620;
+  color: var(--text);
+}
+
+/* ── Hamburger menu ────────────────────────────────────────────────── */
+.dw-hamburger {
+  position: absolute;
+  top: calc(var(--title-bar-h) + 4px);
+  right: 12px;
+  z-index: 140;
+  width: 236px;
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  flex-direction: column;
+}
+
+.dw-hamburger__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 540;
+  text-align: left;
+}
+
+.dw-hamburger__item:hover {
+  background: var(--control-hover);
+}
+
+.dw-hamburger__item svg {
+  color: var(--text-tertiary);
+  width: 15px;
+}
+
+.dw-hamburger__sep {
+  height: 1px;
+  background: var(--divider);
+  margin: 4px 8px;
+}

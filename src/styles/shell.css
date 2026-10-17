@@ -1,0 +1,363 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * DiskWizard shell — app grid, title bar, sidebar, splash, toasts.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.dw-app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  overflow: hidden;
+}
+
+/* ── Title bar ─────────────────────────────────────────────────────── */
+.dw-titlebar {
+  height: var(--title-bar-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--divider);
+  user-select: none;
+}
+
+.dw-titlebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 6px;
+}
+
+.dw-titlebar__name {
+  font-size: 13.5px;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.dw-titlebar__edition {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  font-weight: 640;
+  letter-spacing: 0.04em;
+}
+
+.dw-titlebar__edition--pro {
+  background: var(--ink-soft);
+  color: var(--ink);
+}
+
+.dw-titlebar__spacer {
+  flex: 1;
+}
+
+.dw-titlebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dw-titlebar__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--divider);
+  margin: 0 6px;
+}
+
+/* Windows caption buttons */
+.dw-caption {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: var(--title-bar-h);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.dw-caption:hover {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
+.dw-caption--close:hover {
+  background: var(--close-hover);
+  color: #fff;
+}
+
+/* ── Body grid (sidebar | main) ────────────────────────────────────── */
+.dw-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────── */
+.dw-sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 10px 10px;
+  gap: 2px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.dw-sidebar__group {
+  padding: 14px 8px 6px;
+}
+
+.dw-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 540;
+  text-align: left;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.dw-sidebar__item:hover {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
+.dw-sidebar__item.is-active {
+  background: var(--ink-soft);
+  color: var(--ink);
+  font-weight: 620;
+}
+
+.dw-sidebar__item .dw-sidebar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  color: currentColor;
+  opacity: 0.9;
+}
+
+.dw-sidebar__footer {
+  margin-top: auto;
+  padding: 12px 8px 4px;
+  border-top: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Main region ───────────────────────────────────────────────────── */
+.dw-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--background);
+}
+
+/* ── Splash ────────────────────────────────────────────────────────── */
+.dw-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  gap: 0;
+}
+
+.dw-splash__mark {
+  width: 128px;
+  height: 128px;
+  position: relative;
+}
+
+.dw-splash__mark .dw-brand-mark {
+  width: 100%;
+  height: 100%;
+  box-shadow: var(--ink-glow-strong);
+  animation: dw-splash-breathe 2.6s var(--ease-in-out) infinite;
+}
+
+@keyframes dw-splash-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+.dw-splash__ring {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-soft);
+  animation: dw-splash-ring 2.2s var(--ease-out) infinite;
+}
+
+@keyframes dw-splash-ring {
+  0% { transform: scale(0.86); opacity: 0; }
+  35% { opacity: 1; }
+  100% { transform: scale(1.14); opacity: 0; }
+}
+
+.dw-splash__name {
+  margin-top: 26px;
+  font-size: 26px;
+  font-weight: 760;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.dw-splash__tagline {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.dw-splash__status {
+  margin-top: 34px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dw-splash__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: dw-splash-dot 1.1s var(--ease-in-out) infinite;
+}
+
+@keyframes dw-splash-dot {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.dw-splash__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.dw-splash__progress-fill {
+  height: 100%;
+  width: 64%;
+  background: var(--ink-grad);
+  border-radius: 0 2px 2px 0;
+  animation: dw-splash-progress 2.3s var(--ease-in-out) infinite;
+}
+
+@keyframes dw-splash-progress {
+  0% { margin-left: -64%; }
+  100% { margin-left: 100%; }
+}
+
+.dw-splash__shield {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 560;
+}
+
+.dw-splash__shield svg {
+  color: var(--success);
+}
+
+/* ── Toast ─────────────────────────────────────────────────────────── */
+.dw-toast {
+  position: fixed;
+  bottom: calc(var(--bottom-bar-h) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 180;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 560px;
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  font-size: 13px;
+  font-weight: 540;
+  color: var(--text);
+}
+
+.dw-toast__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.dw-toast__icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.dw-toast--success .dw-toast__icon { color: var(--success); }
+.dw-toast--error .dw-toast__icon { color: var(--danger); }
+.dw-toast--warn .dw-toast__icon { color: var(--warn); }
+.dw-toast--info .dw-toast__icon { color: var(--ink); }
+
+/* ── View swap settle-in (CSS keyframe — the anti-flash contract) ──── */
+.dw-settle-in {
+  animation: dw-settle-in var(--dur-base) var(--ease-out) both;
+}
+
+@keyframes dw-settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dw-settle-in {
+    animation: none;
+  }
+}

@@ -1,0 +1,536 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * DiskWizard home — the landing page (Step 1: Select a Location).
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.dw-home {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Step strip (the 3-step wizard chip header) ────────────────────── */
+.dw-steps {
+  flex: none;
+  height: var(--step-strip-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-bottom: 1px solid var(--divider);
+  background: var(--background);
+}
+
+.dw-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  height: 100%;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 560;
+  position: relative;
+}
+
+.dw-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 11.5px;
+  font-weight: 700;
+  flex: none;
+}
+
+.dw-step.is-active {
+  color: var(--ink);
+}
+
+.dw-step.is-done {
+  color: var(--text-secondary);
+}
+
+.dw-step.is-done .dw-step__num {
+  border-color: var(--free);
+  color: var(--free);
+}
+
+.dw-step__arrow {
+  color: var(--text-tertiary);
+  opacity: 0.6;
+  margin: 0 6px;
+}
+
+/* ── Home content scroller ─────────────────────────────────────────── */
+.dw-home__scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.dw-home__inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 34px 48px 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.dw-home__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.dw-home__title {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.dw-home__refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 580;
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.dw-home__refresh:hover {
+  background: var(--ink-soft);
+}
+
+.dw-home__refresh svg {
+  transition: transform 0.5s var(--ease-out);
+}
+
+.dw-home__refresh:hover svg {
+  transform: rotate(180deg);
+}
+
+.dw-home__refresh.is-busy svg {
+  animation: dw-spin 0.9s linear infinite;
+}
+
+@keyframes dw-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Session resume banner ─────────────────────────────────────────── */
+.dw-session {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+}
+
+.dw-session__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--ink-soft);
+  color: var(--ink);
+  flex: none;
+}
+
+.dw-session__label {
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.dw-session__meta {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.dw-session__load {
+  margin-left: auto;
+}
+
+/* ── Device groups ─────────────────────────────────────────────────── */
+.dw-group__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dw-group__title {
+  font-size: 13px;
+  font-weight: 640;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.dw-group__count {
+  color: var(--text-tertiary);
+  font-weight: 540;
+}
+
+.dw-group__hint {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ── Device tile grid ──────────────────────────────────────────────── */
+.dw-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.dw-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-1);
+  text-align: left;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.dw-tile:hover {
+  border-color: color-mix(in srgb, var(--ink) 45%, var(--border));
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+
+.dw-tile.is-selected {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink-soft) 60%, var(--card));
+  box-shadow: var(--ink-glow);
+}
+
+.dw-tile__icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel);
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.dw-tile__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.dw-tile__icon--locked {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.dw-tile__icon--lost {
+  background: var(--health-caution-soft);
+  color: var(--warn);
+}
+
+.dw-tile__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dw-tile__name {
+  font-size: 14px;
+  font-weight: 640;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dw-tile__name .dw-chip {
+  height: 18px;
+  font-size: 10px;
+  padding: 0 7px;
+}
+
+.dw-tile__model {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-tile__bar {
+  margin-top: 9px;
+  height: 5px;
+  border-radius: 4px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.dw-tile__bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ink-grad);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.dw-tile__bar-fill--warn {
+  background: linear-gradient(180deg, #f7b955 0%, #f5a623 55%, #e09112 100%);
+}
+
+.dw-tile__stats {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dw-tile__fs {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 10.5px;
+}
+
+.dw-tile__trim {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+}
+
+.dw-tile__trim--on {
+  color: var(--text-tertiary);
+}
+
+.dw-tile__trim--off {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 40%, var(--border));
+}
+
+.dw-tile__select {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--control-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.dw-tile.is-selected .dw-tile__select {
+  background: var(--ink-grad);
+  border-color: transparent;
+  color: var(--on-ink);
+}
+
+/* ── Quick locations row (Recycle Bin / Desktop / Select Folder) ──── */
+.dw-quick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.dw-quick__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid transparent;
+  background: color-mix(in srgb, var(--card) 60%, transparent);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.dw-quick__item:hover {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.dw-quick__item.is-selected {
+  border-color: var(--ink);
+  background: var(--card);
+}
+
+.dw-quick__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex: none;
+}
+
+.dw-quick__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dw-quick__sub {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+/* ── Empty / help strip ────────────────────────────────────────────── */
+.dw-home__help {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 0 0;
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+}
+
+.dw-home__help a {
+  color: var(--ink);
+  font-weight: 580;
+}
+
+/* ── Bottom CTA bar (Scan) ─────────────────────────────────────────── */
+.dw-home__cta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 0 48px;
+  background: linear-gradient(180deg, transparent, var(--background) 42%);
+  pointer-events: none;
+}
+
+.dw-home__cta > * {
+  pointer-events: auto;
+}
+
+.dw-home__cta-hint {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  font-weight: 540;
+}
+
+.dw-home__scan {
+  min-width: 218px;
+  height: 44px;
+  font-size: 15px;
+  border-radius: var(--radius-lg);
+}
+
+/* ── SD card coaching page ─────────────────────────────────────────── */
+.dw-coach {
+  max-width: 720px;
+  margin: 40px auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.dw-coach__icon {
+  width: 88px;
+  height: 88px;
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+}
+
+.dw-coach__title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.dw-coach__body {
+  max-width: 520px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dw-coach__tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.dw-coach__tile {
+  padding: 18px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dw-coach__tile svg {
+  color: var(--ink);
+}
+
+.dw-coach__tile-label {
+  font-size: 12.5px;
+  font-weight: 620;
+  color: var(--text);
+}
+
+.dw-coach__tile-sub {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
